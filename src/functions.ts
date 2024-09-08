@@ -165,7 +165,7 @@ export function createICS(schedule: schedule) {
                     title: `${currClass.code} ${currClass.section} - ${day.room}`,
                     start: day.start ? dateToICSArrayWithTime(startDate, day.start) : dateToICSArrayWithTime(startDate, "0000"),
                     end: day.end ? dateToICSArrayWithTime(startDate, day.end) : dateToICSArrayWithTime(startDate, "2359"),
-                    recurrenceRule: day.day.length === 1 ? "FREQ=WEEKLY;INTERVAL=1;COUNT=12" : "FREQ=WEEKLY;INTERVAL=1;COUNT=1",
+                    recurrenceRule: day.day.length === 1 ? "FREQ=WEEKLY;INTERVAL=1;UNTIL="+formatDateToICS(schedule.end) : "FREQ=WEEKLY;INTERVAL=1;COUNT=1"
                 });
             });
         }
@@ -238,6 +238,16 @@ function dateToICSArrayWithTime(date: Date, time: string): number[] {
         minutes,
         0 // Assuming seconds are 0 since they are not provided
     ];
+}
+function formatDateToICS(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
 }
 function createICSFile(events: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] | ics.EventAttributes[], fileName = 'schedule.ics') {
     return new Promise((resolve, reject) => {
