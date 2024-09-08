@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {useDropzone} from "react-dropzone";
+import {createICS, extractTextFromPDF} from "./functions.ts";
 
-function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export default function App() {
+
+
+    // const onDrop = useCallback((acceptedFiles: File[]) => {
+    //     console.log(typeof acceptedFiles);
+    //     console.log(acceptedFiles);
+    //     // Do something with the files
+    // }, [])
+
+
+    function fileValidator(file: File) {
+        if (file.type !== "application/pdf") {
+            console.log("rejected here:");
+            console.log(file.name);
+                return {
+                    code: "not-pdf",
+                    message: "File must be a pdf"
+                }
+        }
+        return null
+    }
+
+    const {
+        getRootProps,
+        getInputProps,
+        // isDragActive,
+        acceptedFiles,
+        fileRejections
+    } = useDropzone({
+        maxFiles: 1,
+        validator: fileValidator,
+    })
+    console.log("accepted:" + acceptedFiles);
+    console.log("rejected:" + fileRejections);
+
+    if(acceptedFiles.length > 0) {
+        extractTextFromPDF(URL.createObjectURL(acceptedFiles[0])).then(
+            formatted =>{
+                createICS(formatted);
+            });
+    }
+
+
+    return (
+        <>
+            <div className="border-8 border-orange-800">
+                File Uploaded:
+                {acceptedFiles && acceptedFiles.length > 0 ? acceptedFiles[0].name : "nothing"}
+
+            </div>
+            <div {...getRootProps()} className="fixed top-0 left-0 w-screen h-screen">
+                <input {...getInputProps()} />
+
+            </div>
+        </>
+
+    )
 }
 
-export default App
