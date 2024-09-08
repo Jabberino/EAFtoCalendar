@@ -154,7 +154,7 @@ export async function extractTextFromPDF(url: string) {
 
 export function createICS(schedule: schedule) {
     const events = schedule.classes.flatMap(currClass => {
-        const classes = [];
+        const classes: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] = [];
         if (currClass.days && currClass.days.length > 0) {
             currClass.days.forEach(day => {
                 if (day.day == null) {
@@ -197,7 +197,7 @@ function getSoonestDate(startDate: Date, dayChar: string): Date {
         const monthIndex = new Date(`${monthAbbr} 1, 2000`).getMonth();
 
         // Create the date
-        let year = startDate.getFullYear();
+        const year = startDate.getFullYear();
         let resultDate = new Date(year, monthIndex, day);
 
         // If the result date is before the start date, increment the year
@@ -239,8 +239,9 @@ function dateToICSArrayWithTime(date: Date, time: string): number[] {
         0 // Assuming seconds are 0 since they are not provided
     ];
 }
-function createICSFile(events, fileName = 'schedule.ics') {
+function createICSFile(events: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] | ics.EventAttributes[], fileName = 'schedule.ics') {
     return new Promise((resolve, reject) => {
+        // @ts-expect-error will look into this later
         createEvents(events, (error, value) => {
             if (error) {
                 reject(error);
