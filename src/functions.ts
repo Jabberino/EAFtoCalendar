@@ -2,7 +2,7 @@ import {classSchedule, day, schedule,Text} from "./interfaces.ts";
 import * as ics from 'ics'
 import {createEvents} from "ics";
 
-export async function extractTextFromPDF(url: string) {
+export async function extractClassesFromPDF(url: string) {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -151,6 +151,38 @@ export async function extractTextFromPDF(url: string) {
 
 
 }
+export async function extractYearTermFromPDF(url: string): Promise<{ ay: number; term: number }> {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const uint8array = new Uint8Array(arrayBuffer);
+    const decoder = new TextDecoder('utf-8');
+    const whole = decoder.decode(uint8array);
+
+    let start: number = whole.indexOf("(STUDENT ENROLLMENT RECORD)");
+    if(start === -1){
+        throw new Error("Invalid PDF");
+    }
+
+    start = whole.indexOf("AY") + 3;
+    if(start === -1){
+        throw new Error("Problem reading AY");
+    }
+    const details = whole.substring(start,start+17);
+
+    details.split(", Term ");
+
+    const academicYear = details[0].split("-");
+
+    const ay = parseInt(academicYear[0]);
+
+    const term = parseInt(details[1]);
+
+    return { ay, term };
+
+}
+
+
 
 export function createICS(schedule: schedule) {
     const events = schedule.classes.flatMap(currClass => {
