@@ -99,9 +99,7 @@ export default function App() {
                 // <div className="flex justify-center w-1/2 min-h-96 self-center border rounded-md drop-shadow-lg bg-white mb-24">
                 //     {}
                 // </div>
-                <div className="flex flex-col flex-grow border self-center bg-darkgreen rounded-lg p-3 px-7">
-                    <a href={downloadLink} download={`Schedule.ics`} className="text-white text-xl text-center">Download</a>
-                </div>
+                <a href={downloadLink} download={`Schedule.ics`} className="flex flex-grow border self-center bg-darkgreen rounded-lg p-3 px-7 text-white text-xl text-center drop-shadow-lg">Download</a>
             }
 
         </div>
