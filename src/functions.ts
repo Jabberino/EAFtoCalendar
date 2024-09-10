@@ -214,7 +214,7 @@ export async function createICS(schedule: schedule): Promise<string> {
                 }
                 const startDate = getSoonestDate(schedule.start, day.day);
                 classes.push({
-                    title: `${currClass.code} ${currClass.section} - ${day.room}`,
+                    title: `${currClass?.code || ''} ${currClass?.section || ''}${day?.room ? ' - ' + day?.room : ''}`,
                     start: day.start ? dateToICSArrayWithTime(startDate, day.start) : dateToICSArrayWithTime(startDate, "0000"),
                     end: day.end ? dateToICSArrayWithTime(startDate, day.end) : dateToICSArrayWithTime(startDate, "2359"),
                     recurrenceRule: day.day.length === 1 ? "FREQ=WEEKLY;INTERVAL=1;UNTIL="+formatDateToICS(schedule.end) : "FREQ=WEEKLY;INTERVAL=1;COUNT=1"
