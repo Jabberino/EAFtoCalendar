@@ -1,6 +1,8 @@
-import {classSchedule, day, schedule,Text} from "./interfaces.ts";
+import {classSchedule, day, schedule, supportedTerm, Text} from "./interfaces.ts";
 import * as ics from 'ics'
 import {createEvents} from "ics";
+
+
 
 export async function extractClassesFromPDF(url: string) {
     const response = await fetch(url);
@@ -151,7 +153,10 @@ export async function extractClassesFromPDF(url: string) {
 
 
 }
-export async function extractYearTermFromPDF(url: string): Promise<{ ay: number; term: number }> {
+export async function extractYearTermFromPDF(url: string | null): Promise<{ ay: number; term: number }| null> {
+    if(!url){
+        return null;
+    }
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -160,8 +165,9 @@ export async function extractYearTermFromPDF(url: string): Promise<{ ay: number;
     const whole = decoder.decode(uint8array);
 
     let start: number = whole.indexOf("(STUDENT ENROLLMENT RECORD)");
+    console.log(start);
     if(start === -1){
-        throw new Error("Invalid PDF");
+        throw new Error("Not recognized as an EAF");
     }
 
     start = whole.indexOf("AY") + 3;
@@ -169,17 +175,38 @@ export async function extractYearTermFromPDF(url: string): Promise<{ ay: number;
         throw new Error("Problem reading AY");
     }
     const details = whole.substring(start,start+17);
-
-    details.split(", Term ");
-
-    const academicYear = details[0].split("-");
+    const tokens = details.split(", Term ");
+    const academicYear = tokens[0].split("-");
 
     const ay = parseInt(academicYear[0]);
-
-    const term = parseInt(details[1]);
+    const term = parseInt(tokens[1]);
 
     return { ay, term };
+}
 
+export async function termIsSupported({ay, term}: {ay: number, term: number}):Promise<{ start: string, end:string }|null> {
+    let supportedTerms: supportedTerm[] = [];
+
+    try {
+        const response = await fetch('/terms.json');
+        if (!response.ok) {
+            throw new Error();
+        }
+        supportedTerms = await response.json();
+
+        // Check if any term meets your criteria
+        for (const supportedTerm of supportedTerms) {
+            // Example condition: update this with your actual logic
+            if (supportedTerm.ay === ay && supportedTerm.term === term) {
+                return {start: supportedTerm.start, end: supportedTerm.end};
+            }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+        throw new Error("Problem fetching supported terms");
+    }
+
+    return null;
 }
 
 

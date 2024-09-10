@@ -27,3 +27,10 @@ export interface Text {
     y: number;
     text: string;
 }
+
+export interface supportedTerm {
+    ay: number;
+    term: number;
+    start: string;
+    end: string;
+}
