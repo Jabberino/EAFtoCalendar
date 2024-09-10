@@ -11,11 +11,10 @@
   },
   "dependencies": {
     "ics": "^3.7.6",
-    "pdfjs-dist": "^4.6.82",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
-    "react-query": "^3.39.3"
+    "vite-bundle-visualizer": "^1.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
