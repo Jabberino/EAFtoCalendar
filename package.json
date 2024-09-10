@@ -13,8 +13,7 @@
     "ics": "^3.7.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-dropzone": "^14.2.3",
-    "vite-bundle-visualizer": "^1.2.1"
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
