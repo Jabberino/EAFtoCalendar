@@ -14,10 +14,9 @@ export interface classSchedule {
 }
 
 export interface schedule {
-    classes: classSchedule[];
+    classes: classSchedule[] | undefined;
     ay: number;
     term: number;
-
     start: Date;
     end: Date;
 }

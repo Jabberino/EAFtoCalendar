@@ -4,7 +4,7 @@ import {createEvents} from "ics";
 
 
 
-export async function extractClassesFromPDF(url: string) {
+export async function extractClassesFromPDF(url: string, schedule: schedule): Promise<schedule> {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -50,13 +50,7 @@ export async function extractClassesFromPDF(url: string) {
     }
 
     const classes: classSchedule[] = [];
-    const schedule: schedule = {
-        classes: classes,
-        ay: 2024,
-        term: 1,
-        start: new Date('2024-09-02'),
-        end: new Date('2024-12-08'),
-    }
+
 
     let xOffset = 0;
     let newCourse = 0;
@@ -149,9 +143,9 @@ export async function extractClassesFromPDF(url: string) {
 
     }
 
+
+    schedule.classes = classes;
     return schedule;
-
-
 }
 export async function extractYearTermFromPDF(url: string | null): Promise<{ ay: number; term: number }| null> {
     if(!url){
@@ -165,7 +159,6 @@ export async function extractYearTermFromPDF(url: string | null): Promise<{ ay: 
     const whole = decoder.decode(uint8array);
 
     let start: number = whole.indexOf("(STUDENT ENROLLMENT RECORD)");
-    console.log(start);
     if(start === -1){
         throw new Error("Not recognized as an EAF");
     }
@@ -183,7 +176,6 @@ export async function extractYearTermFromPDF(url: string | null): Promise<{ ay: 
 
     return { ay, term };
 }
-
 export async function termIsSupported({ay, term}: {ay: number, term: number}):Promise<{ start: string, end:string }|null> {
     let supportedTerms: supportedTerm[] = [];
 
@@ -211,7 +203,8 @@ export async function termIsSupported({ay, term}: {ay: number, term: number}):Pr
 
 
 
-export function createICS(schedule: schedule) {
+export async function createICS(schedule: schedule): Promise<string> {
+    // @ts-expect-error is checked before call (not very good for future proofing, I know)
     const events = schedule.classes.flatMap(currClass => {
         const classes: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] = [];
         if (currClass.days && currClass.days.length > 0) {
@@ -231,16 +224,12 @@ export function createICS(schedule: schedule) {
         return classes;
     });
 
-    console.log(events);
-    createICSFile(events)
-        .then(url => {
-            console.log('ICS file created at:', url);
-        })
-        .catch(error => {
-            console.error('Error creating ICS file:', error);
-        });
+    try{
+       return createICSFile(events);
+    }catch(error){
+        throw new Error('Error creating ICS file: ' + error)
+    }
 
-    return events;
 }
 
 function getSoonestDate(startDate: Date, dayChar: string): Date {
@@ -308,32 +297,21 @@ function formatDateToICS(date: Date): string {
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
 }
-function createICSFile(events: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] | ics.EventAttributes[], fileName = 'schedule.ics') {
+function createICSFile(events: { title: string; start: number[]; end: number[]; recurrenceRule: string; }[] | ics.EventAttributes[]): Promise<string> {
     return new Promise((resolve, reject) => {
-        // @ts-expect-error will look into this later
+        // Convert events array to ICS format
+        // @ts-expect-error will figure this out later lol
         createEvents(events, (error, value) => {
             if (error) {
                 reject(error);
                 return;
             }
 
-            const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
+            // Create a Blob with the ICS data
+            const blob = new Blob([value], { type: 'text/calendar' });
+
+            // Generate a URL for the Blob
             const url = URL.createObjectURL(blob);
-
-            // Create a temporary link element
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-
-            // Append the link to the body
-            document.body.appendChild(link);
-
-            // Trigger the download by simulating a click
-            link.click();
-
-            // Clean up by removing the link
-            document.body.removeChild(link);
-
             resolve(url);
         });
     });
