@@ -95,6 +95,7 @@ export default function App() {
             }
             <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white text-center p-2"> For any bugs (or internships 🙂),
                 email me: <a href="mailto:darlito_guamos@dlsu.edu.ph" className="underline">darlito_guamos@dlsu.edu.ph</a>
+                {" "} or create a ticket on the <a href="https://github.com/Jabberino/EAFtoCalendar" className="underline" target="_blank">repository</a>.
             </div>
         </div>
 
