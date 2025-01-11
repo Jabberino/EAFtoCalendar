@@ -10,11 +10,13 @@ interface UploadInterface {
 export default function Upload({getRootProps, getInputProps, acceptedFile, error}: UploadInterface) {
 
     return (
-        <div className="flex flex-col justify-end pt-48 pb-8">
+        <div className="flex flex-col justify-end pt-48">
             <h1 className="text-center font-bold text-darkgreen text-4xl sm:text-8xl">EAFToCalendar</h1>
-            <h2 className="text-center font-medium text-sm sm:text-2xl">Extract your daily class schedule from your EAF</h2>
-            <h3 className="text-center font-normal text-xs sm:text-sm  italic ">Runs on the browser, so your data never leaves the
-                device.</h3>
+            <h2 className="text-center font-medium text-sm sm:text-2xl">Extract your daily class schedule from your
+                EAF</h2>
+            <h3 className="text-center font-normal text-xs sm:text-sm  italic ">Runs on the browser, so your data never
+                leaves the device.</h3>
+
             <div className="flex justify-center pt-3 items-center space-x-3">
                 <img src="/appleCalendar.png" className="sm:w-16 sm:h-16 w-10 h-10" alt="Apple calendar icon"/>
                 <img src="/googleCalendar.png" className="sm:w-16 sm:h-16 w-10 h-10" alt="Google calendar icon"/>
