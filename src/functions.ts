@@ -18,7 +18,6 @@ export async function extractClassesFromPDF(url: string, schedule: schedule): Pr
 
     const part = whole.substring(start, end);
 
-
     const lines = part.split('\n');
     const result = [] as Text[];
 
@@ -51,9 +50,9 @@ export async function extractClassesFromPDF(url: string, schedule: schedule): Pr
 
     const classes: classSchedule[] = [];
 
-
     let xOffset = 0;
     let newCourse = 0;
+    let isDoubleDay; // when two days are combined (MH vs M and H different lines)
     for (const text of result) {
         if(newCourse === -1){
             break;
@@ -89,16 +88,33 @@ export async function extractClassesFromPDF(url: string, schedule: schedule): Pr
                 break
             }
             case 230: {
+                isDoubleDay = 0;
                 if (classes[currIndex].days === undefined) {
                     classes[currIndex].days = [] as day[];
                 }
 
                 if (!text.text)
                     continue
+                if(text.text.length == 2)
+                    isDoubleDay = 1;
 
                 classes[currIndex].days?.push({} as day);
-                // @ts-expect-error Will add error handling later
-                classes[currIndex].days[classes[currIndex].days.length - 1].day = text.text;
+                if(isDoubleDay){
+                    classes[currIndex].days?.push({} as day);
+                }
+
+
+                if(isDoubleDay){
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 2].day = text.text.charAt(0);
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 1].day = text.text.charAt(1);
+                }
+                else{
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 1].day = text.text;
+                }
+
                 break;
             }
             case 290: {
@@ -106,11 +122,17 @@ export async function extractClassesFromPDF(url: string, schedule: schedule): Pr
                     continue
 
                 const time = text.text.split("-");
+                if(isDoubleDay){
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 2].start = time[0];
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 2].end = time[1];
+                }
+
                 // @ts-expect-error Will add error handling later
                 classes[currIndex].days[classes[currIndex].days.length - 1].start = time[0];
                 // @ts-expect-error Will add error handling later
                 classes[currIndex].days[classes[currIndex].days.length - 1].end = time[1];
-
 
                 break;
             }
@@ -118,11 +140,19 @@ export async function extractClassesFromPDF(url: string, schedule: schedule): Pr
                 if (!text.text) {
                     // @ts-expect-error Will add error handling later
                     classes[currIndex].days[classes[currIndex].days.length - 1].room = null;
+                    if(isDoubleDay){
+                        // @ts-expect-error Will add error handling later
+                        classes[currIndex].days[classes[currIndex].days.length - 2].room = null;
+                    }
                     continue;
                 }
 
                 // @ts-expect-error Will add error handling later
                 classes[currIndex].days[classes[currIndex].days.length - 1].room = text.text;
+                if(isDoubleDay){
+                    // @ts-expect-error Will add error handling later
+                    classes[currIndex].days[classes[currIndex].days.length - 2].room = text.text;
+                }
 
                 break;
             }
@@ -200,8 +230,6 @@ export async function termIsSupported({ay, term}: {ay: number, term: number}):Pr
 
     return null;
 }
-
-
 
 export async function createICS(schedule: schedule): Promise<string> {
     // @ts-expect-error is checked before call (not very good for future proofing, I know)
