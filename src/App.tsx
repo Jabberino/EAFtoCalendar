@@ -102,6 +102,7 @@ export default function App() {
                              className="underline">darlito_guamos@dlsu.edu.ph</a>
                 {" "} or <a href="https://github.com/Jabberino/EAFtoCalendar"
                                                    className="underline" target="_blank">repository</a>.
+                Last Updated 2025/01/12
             </div>
         </div>
 
